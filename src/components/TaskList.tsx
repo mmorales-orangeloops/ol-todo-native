@@ -26,7 +26,10 @@ export default function TaskList(props: TaskListProps): React.JSX.Element {
                         onPress={() => props.onChangeTask(task.id)}
                     />
                     <ListItem.Content>
-                        <ListItem.Title>{task.name}</ListItem.Title>
+                        <ListItem.Title
+                            style={{ textDecorationLine: task.completed ? 'line-through' : 'none' }}>
+                            {task.name}
+                        </ListItem.Title>
                     </ListItem.Content>
                     <ListItem.Chevron />
                 </ListItem>))

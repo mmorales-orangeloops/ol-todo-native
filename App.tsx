@@ -12,20 +12,19 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
-  useColorScheme,
   View,
+  useColorScheme,
 } from 'react-native';
-
-import { Button } from '@rneui/themed';
-
-import Icon from 'react-native-vector-icons/Ionicons';
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 import { tasks } from './src/data/Data';
 
+import TaskListHeader from './src/components/TaskListHeader';
+
 import TaskList from './src/components/TaskList';
+
+import AddTask from './src/components/AddTask';
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -53,34 +52,37 @@ function App(): React.JSX.Element {
     setYourTasks([]);
   }
 
+  function addTask(taskName: string) {
+    setYourTasks([
+      ...yourTasks,
+      {
+        id: yourTasks.length,
+        name: taskName,
+        detail: 'Detail for' + taskName,
+        completed: false
+      }
+    ]);
+  }
+
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <SafeAreaView style={{ flexGrow: 1, padding: 10 }}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
       <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
+        automaticallyAdjustKeyboardInsets={true}
+        contentInsetAdjustmentBehavior='automatic'
+        contentContainerStyle={{ flexGrow: 1, padding: 10 }}>
         <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            padding: 10
           }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between'
-            }}>
-            <Text style={styles.titleText}>Tasks</Text>
-            <Button type="solid" color="red" onPress={cleanTasks}>
-              <Icon name="trash" size={20} color="white" />
-              <Text style={styles.buttonText}>Clean</Text>
-            </Button>
-          </View>
-          <Text style={styles.italic}>{yourTasks.filter((task) => !task.completed).length} items left</Text>
+          <TaskListHeader tasks={yourTasks} onCleanTasks={cleanTasks} />
           <TaskList tasks={yourTasks} onChangeTask={handleToggleTask} />
         </View>
+        <View style={{ flexGrow: 2 }} />
+        <AddTask onAddTask={addTask} />
       </ScrollView>
     </SafeAreaView>
   );
