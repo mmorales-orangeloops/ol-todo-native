@@ -9,13 +9,14 @@ import { Task } from '../data/Data';
 type TaskListProps = PropsWithChildren<{
     tasks: Task[];
     onChangeTask: (taskId: number) => void
+    onSelectTask: (taskId: number) => void
 }>;
 
 export default function TaskList(props: TaskListProps): React.JSX.Element {
     return (
         <View>
             {props.tasks.map((task, i) => (
-                <ListItem key={i} bottomDivider>
+                <ListItem key={i} onPress={() => props.onSelectTask(task.id)} bottomDivider>
                     <ListItem.CheckBox
                         iconType="material"
                         checkedColor='orange'

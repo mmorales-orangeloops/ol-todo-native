@@ -5,13 +5,12 @@
  * @format
  */
 
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 
 import {
   SafeAreaView,
   ScrollView,
   StatusBar,
-  StyleSheet,
   View,
   useColorScheme,
 } from 'react-native';
@@ -20,20 +19,38 @@ import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 import { tasks } from './src/data/Data';
 
+import { YourTasksContext } from './src/hooks/YourTasksContext';
+
 import TaskListHeader from './src/components/TaskListHeader';
 
 import TaskList from './src/components/TaskList';
 
 import AddTask from './src/components/AddTask';
 
-function App(): React.JSX.Element {
+import TaskDetail from './src/components/TaskDetail';
+
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+
+import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
+
+type RootStackParamList = {
+  Home: undefined;
+  TaskDetail: { taskId: number };
+};
+
+type HomeProps = NativeStackScreenProps<RootStackParamList>;
+export type TaskDetailProps = NativeStackScreenProps<RootStackParamList, 'TaskDetail'>;
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+function Home({ navigation }: HomeProps) {
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  const [yourTasks, setYourTasks] = useState(tasks);
+  const { yourTasks, setYourTasks } = useContext(YourTasksContext);
 
   function handleToggleTask(taskId: number) {
     setYourTasks(yourTasks.map(task => {
@@ -48,6 +65,12 @@ function App(): React.JSX.Element {
     }));
   }
 
+  function handleSelectTask(taskId: number) {
+    navigation.navigate('TaskDetail', {
+      taskId: taskId
+    });
+  }
+
   function cleanTasks() {
     setYourTasks([]);
   }
@@ -58,7 +81,7 @@ function App(): React.JSX.Element {
       {
         id: yourTasks.length,
         name: taskName,
-        detail: 'Detail for' + taskName,
+        detail: 'Detail for ' + taskName,
         completed: false
       }
     ]);
@@ -79,7 +102,7 @@ function App(): React.JSX.Element {
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
           <TaskListHeader tasks={yourTasks} onCleanTasks={cleanTasks} />
-          <TaskList tasks={yourTasks} onChangeTask={handleToggleTask} />
+          <TaskList tasks={yourTasks} onChangeTask={handleToggleTask} onSelectTask={handleSelectTask} />
         </View>
         <View style={{ flexGrow: 2 }} />
         <AddTask onAddTask={addTask} />
@@ -88,19 +111,27 @@ function App(): React.JSX.Element {
   );
 }
 
-const styles = StyleSheet.create({
-  italic: {
-    fontStyle: 'italic'
+function App(): React.JSX.Element {
+  const [yourTasks, setYourTasks] = useState(tasks);
+
+  return (
+    <YourTasksContext.Provider value={{ yourTasks: yourTasks, setYourTasks: setYourTasks }}>
+      <NavigationContainer theme={NavigationTheme}>
+        <Stack.Navigator initialRouteName='Home'>
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="TaskDetail" component={TaskDetail} options={{ title: 'Task Detail' }} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </YourTasksContext.Provider>
+  );
+}
+
+const NavigationTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: 'white'
   },
-  titleText: {
-    fontSize: 30,
-    fontWeight: 'bold',
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: 'white'
-  },
-});
+};
 
 export default App;
