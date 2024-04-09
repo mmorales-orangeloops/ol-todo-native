@@ -1,13 +1,11 @@
-import { useContext } from 'react';
-
 import { View, Text } from 'react-native';
 
 import { TaskDetailProps } from '../../App';
 
-import { YourTasksContext } from '../hooks/YourTasksContext';
+import { useYourTasks } from './YourTasksContext';
 
 export default function TaskDetail({ route }: TaskDetailProps): React.JSX.Element {
-    const { yourTasks } = useContext(YourTasksContext);
+    const { yourTasks } = useYourTasks()
 
     return (
         <View>

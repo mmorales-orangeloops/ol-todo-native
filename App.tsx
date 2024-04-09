@@ -5,8 +5,6 @@
  * @format
  */
 
-import { useState, useContext } from 'react';
-
 import {
   SafeAreaView,
   ScrollView,
@@ -17,9 +15,7 @@ import {
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 
-import { tasks } from './src/data/Data';
-
-import { YourTasksContext } from './src/hooks/YourTasksContext';
+import { YourTasksProvider, useYourTasks } from './src/components/YourTasksContext';
 
 import TaskListHeader from './src/components/TaskListHeader';
 
@@ -50,7 +46,7 @@ function Home({ navigation }: HomeProps) {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  const { yourTasks, setYourTasks } = useContext(YourTasksContext);
+  const { yourTasks, setYourTasks } = useYourTasks()
 
   function handleToggleTask(taskId: number) {
     setYourTasks(yourTasks.map(task => {
@@ -112,17 +108,15 @@ function Home({ navigation }: HomeProps) {
 }
 
 function App(): React.JSX.Element {
-  const [yourTasks, setYourTasks] = useState(tasks);
-
   return (
-    <YourTasksContext.Provider value={{ yourTasks: yourTasks, setYourTasks: setYourTasks }}>
+    <YourTasksProvider>
       <NavigationContainer theme={NavigationTheme}>
         <Stack.Navigator initialRouteName='Home'>
           <Stack.Screen name="Home" component={Home} />
           <Stack.Screen name="TaskDetail" component={TaskDetail} options={{ title: 'Task Detail' }} />
         </Stack.Navigator>
       </NavigationContainer>
-    </YourTasksContext.Provider>
+    </YourTasksProvider>
   );
 }
 
