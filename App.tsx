@@ -5,36 +5,48 @@
  * @format
  */
 
-import { useState } from 'react';
-
 import {
   SafeAreaView,
   ScrollView,
   StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
   View,
+  useColorScheme,
 } from 'react-native';
-
-import { Button } from '@rneui/themed';
-
-import Icon from 'react-native-vector-icons/Ionicons';
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 
-import { tasks } from './src/data/Data';
+import { YourTasksProvider, useYourTasks } from './src/components/YourTasksContext';
+
+import TaskListHeader from './src/components/TaskListHeader';
 
 import TaskList from './src/components/TaskList';
 
-function App(): React.JSX.Element {
+import AddTask from './src/components/AddTask';
+
+import TaskDetail from './src/components/TaskDetail';
+
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+
+import { NativeStackScreenProps, createNativeStackNavigator } from '@react-navigation/native-stack';
+
+type RootStackParamList = {
+  Home: undefined;
+  TaskDetail: { taskId: number };
+};
+
+type HomeProps = NativeStackScreenProps<RootStackParamList>;
+export type TaskDetailProps = NativeStackScreenProps<RootStackParamList, 'TaskDetail'>;
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+function Home({ navigation }: HomeProps) {
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  const [yourTasks, setYourTasks] = useState(tasks);
+  const { yourTasks, setYourTasks } = useYourTasks()
 
   function handleToggleTask(taskId: number) {
     setYourTasks(yourTasks.map(task => {
@@ -49,56 +61,71 @@ function App(): React.JSX.Element {
     }));
   }
 
+  function handleSelectTask(taskId: number) {
+    navigation.navigate('TaskDetail', {
+      taskId: taskId
+    });
+  }
+
   function cleanTasks() {
     setYourTasks([]);
   }
 
+  function addTask(taskName: string) {
+    setYourTasks([
+      ...yourTasks,
+      {
+        id: yourTasks.length,
+        name: taskName,
+        detail: 'Detail for ' + taskName,
+        completed: false
+      }
+    ]);
+  }
+
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <SafeAreaView style={{ flexGrow: 1, padding: 10 }}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
       <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
+        automaticallyAdjustKeyboardInsets={true}
+        contentInsetAdjustmentBehavior='automatic'
+        contentContainerStyle={{ flexGrow: 1, padding: 10 }}>
         <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            padding: 10
           }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between'
-            }}>
-            <Text style={styles.titleText}>Tasks</Text>
-            <Button type="solid" color="red" onPress={cleanTasks}>
-              <Icon name="trash" size={20} color="white" />
-              <Text style={styles.buttonText}>Clean</Text>
-            </Button>
-          </View>
-          <Text style={styles.italic}>{yourTasks.filter((task) => !task.completed).length} items left</Text>
-          <TaskList tasks={yourTasks} onChangeTask={handleToggleTask} />
+          <TaskListHeader tasks={yourTasks} onCleanTasks={cleanTasks} />
+          <TaskList tasks={yourTasks} onChangeTask={handleToggleTask} onSelectTask={handleSelectTask} />
         </View>
+        <View style={{ flexGrow: 2 }} />
+        <AddTask onAddTask={addTask} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  italic: {
-    fontStyle: 'italic'
+function App(): React.JSX.Element {
+  return (
+    <YourTasksProvider>
+      <NavigationContainer theme={NavigationTheme}>
+        <Stack.Navigator initialRouteName='Home'>
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="TaskDetail" component={TaskDetail} options={{ title: 'Task Detail' }} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </YourTasksProvider>
+  );
+}
+
+const NavigationTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: 'white'
   },
-  titleText: {
-    fontSize: 30,
-    fontWeight: 'bold',
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: 'white'
-  },
-});
+};
 
 export default App;
