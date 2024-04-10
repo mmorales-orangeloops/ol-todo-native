@@ -54,8 +54,10 @@ function Home({ navigation }: HomeProps) {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  const { yourTasks, setYourTasks } = useYourTasks()
+  const { yourTasks, setYourTasks } = useYourTasks();
+
   const [filter, setFilter] = useState(TasksFilter.All);
+  const filteredTasks = filterTasks();
 
   function handleToggleTask(taskId: number) {
     setYourTasks(yourTasks.map(task => {
@@ -84,7 +86,7 @@ function Home({ navigation }: HomeProps) {
     setFilter(filter)
   }
 
-  function filteredTasks(filter: TasksFilter) {
+  function filterTasks() {
     switch (filter) {
       case TasksFilter.All:
         return yourTasks
@@ -121,8 +123,8 @@ function Home({ navigation }: HomeProps) {
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <TaskListHeader tasks={filteredTasks(filter)} onCleanTasks={cleanTasks} />
-          <TaskList tasks={filteredTasks(filter)} onChangeTask={handleToggleTask} onSelectTask={handleSelectTask} />
+          <TaskListHeader tasks={filteredTasks} onCleanTasks={cleanTasks} />
+          <TaskList tasks={filteredTasks} onChangeTask={handleToggleTask} onSelectTask={handleSelectTask} />
         </View>
         <View style={{ flexGrow: 2 }} />
         <Divider style={{ width: "100%", marginBottom: 10 }} />
