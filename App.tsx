@@ -5,6 +5,8 @@
  * @format
  */
 
+import { useState } from 'react';
+
 import {
   SafeAreaView,
   ScrollView,
@@ -13,13 +15,19 @@ import {
   useColorScheme,
 } from 'react-native';
 
+import { Divider } from '@rneui/themed';
+
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+
+import { TasksFilter } from './src/utils/Types';
 
 import { YourTasksProvider, useYourTasks } from './src/components/YourTasksContext';
 
 import TaskListHeader from './src/components/TaskListHeader';
 
 import TaskList from './src/components/TaskList';
+
+import TaskListFilter from './src/components/TaskListFilter';
 
 import AddTask from './src/components/AddTask';
 
@@ -47,6 +55,7 @@ function Home({ navigation }: HomeProps) {
   };
 
   const { yourTasks, setYourTasks } = useYourTasks()
+  const [filter, setFilter] = useState(TasksFilter.All);
 
   function handleToggleTask(taskId: number) {
     setYourTasks(yourTasks.map(task => {
@@ -69,6 +78,21 @@ function Home({ navigation }: HomeProps) {
 
   function cleanTasks() {
     setYourTasks([]);
+  }
+
+  function handleFilterTasks(filter: TasksFilter) {
+    setFilter(filter)
+  }
+
+  function filteredTasks(filter: TasksFilter) {
+    switch (filter) {
+      case TasksFilter.All:
+        return yourTasks
+      case TasksFilter.Active:
+        return yourTasks.filter((task) => !task.completed)
+      case TasksFilter.Completed:
+        return yourTasks.filter((task) => task.completed)
+    }
   }
 
   function addTask(taskName: string) {
@@ -97,10 +121,12 @@ function Home({ navigation }: HomeProps) {
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <TaskListHeader tasks={yourTasks} onCleanTasks={cleanTasks} />
-          <TaskList tasks={yourTasks} onChangeTask={handleToggleTask} onSelectTask={handleSelectTask} />
+          <TaskListHeader tasks={filteredTasks(filter)} onCleanTasks={cleanTasks} />
+          <TaskList tasks={filteredTasks(filter)} onChangeTask={handleToggleTask} onSelectTask={handleSelectTask} />
         </View>
         <View style={{ flexGrow: 2 }} />
+        <Divider style={{ width: "100%", marginBottom: 10 }} />
+        <TaskListFilter currentFilter={filter} onSelectFilter={handleFilterTasks} />
         <AddTask onAddTask={addTask} />
       </ScrollView>
     </SafeAreaView>
