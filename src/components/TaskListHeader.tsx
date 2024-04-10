@@ -8,12 +8,12 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 import { Task } from '../data/Data';
 
-type TaskListProps = PropsWithChildren<{
+type TaskListHeaderProps = PropsWithChildren<{
     tasks: Task[];
     onCleanTasks: () => void
 }>;
 
-export default function TaskListHeader(props: TaskListProps): React.JSX.Element {
+export default function TaskListHeader(props: TaskListHeaderProps): React.JSX.Element {
     return (
         <View>
             <View
